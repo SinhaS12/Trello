@@ -1,0 +1,52 @@
+import express from 'express';
+import { Making_organization } from '../validation/organization';
+import { prisma } from 'db';
+import { middleware } from '../middleware/middleware';
+const route=express.Router();
+
+route.post("/createOrganization",middleware,async(req,res)=>{
+    const userId=req.userId;
+    if(!userId){
+        return res.status(403).json({
+            success:false,
+            message:"Can,t access the email "
+        })
+    }
+    const main=Making_organization.safeParse(req.body);
+    if(!main.success){
+        return res.status(402).json({
+            success:false,
+            message:"Please check the inputs "
+        })
+    }
+    const {title,description}=main.data;
+    try{
+        const exisiting=await prisma.organization.findUnique({where:{title}});
+        if(exisiting){
+            return res.status(402).json({
+                success:false,
+                message:"Organization already exists"
+            })
+        }
+        const new_org=await prisma.organization.create({
+            data:{
+                title,
+                description
+            },
+            select:{
+                title:true
+            }
+        })
+        return res.status(200).json({
+            success:true,
+            message:"Organization made successfully",
+            org_name:new_org
+        })
+
+    }catch(error){
+        return res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        })
+    }
+})

@@ -42,9 +42,10 @@ route.post("/signup",async(req,res)=>{
             },
             select:{
                 name:true,
+                id:true
             }
         })
-        const token=jwt.sign({email:email},jwt_pass);
+        const token=jwt.sign({userId:new_one.id,email:email},jwt_pass);
         return res.status(200).json({
             success:true,
             message:"Signup Completed",
@@ -84,7 +85,7 @@ route.post("/signin",async(req,res)=>{
                 message:"Incorrect password please check !"
             })
         }
-        const token=jwt.sign({email:email},jwt_pass);
+        const token=jwt.sign({userId:find_existing.id,email:email},jwt_pass);
         return res.status(200).json({
             success:true,
             message:"Sigin Done Successfully",
@@ -98,3 +99,5 @@ route.post("/signin",async(req,res)=>{
         })
     }
 })
+
+export default route;
