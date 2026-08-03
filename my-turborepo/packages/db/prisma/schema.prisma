@@ -41,7 +41,7 @@ model Boards {
   id             String       @id @default(uuid())
   title          String @unique
   organizationId String
-  organization   organization @relation(fields: [organizationId], references: [id])
+  organization   organization @relation(fields: [organizationId], references: [id],onDelete: Cascade)
   Issue          Issue[]
   Section        Section[]
 }
@@ -50,7 +50,7 @@ model Section {
   id      String  @id @default(uuid())
   title   String
   boardId String
-  board   Boards  @relation(fields: [boardId], references: [id])
+  board   Boards  @relation(fields: [boardId], references: [id],onDelete: Cascade)
   Issue   Issue[]
 }
 

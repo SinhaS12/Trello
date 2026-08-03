@@ -1,5 +1,5 @@
 import express from 'express';
-import { Making_organization } from '../validation/organization';
+import { Delete_organization, Making_organization } from '../validation/organization';
 import { prisma } from 'db';
 import { middleware } from '../middleware/middleware';
 const route = express.Router();
@@ -61,4 +61,61 @@ route.post("/createOrganization", middleware, async (req, res) => {
         })
     }
 })
+route.delete("/deleteOrganization", middleware, async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(403).json({
+            success: false,
+            message: "Can,t Access the user"
+        })
+    }
+    const main = Delete_organization.safeParse(req.body);
+    if (!main.success) {
+        return res.status(403).json({
+            success: false,
+            message: "Please check the inputs"
+        })
+    }
+    const { organizationId } = main.data;
+    try {
+
+        const powe_to_delete = await prisma.membership.findFirst({
+            where: { organizationId: organizationId }, select: {
+                userId: true,
+                id: true
+            }
+        });
+        if (!powe_to_delete) {
+            return res.status(403).json({
+                success: false,
+                message: "Can,t find the organization"
+            })
+        }
+        if (powe_to_delete.userId != userId) {
+            return res.status(402).json({
+                success: false,
+                message: "Access Denied!"
+            })
+        }
+        const delelted = await prisma.organization.delete({ where: { id: powe_to_delete.id },select:{
+            title:true
+        } });
+        return res.status(200).json({
+            success: true,
+            message: "Organization Deleted Successfully",
+            deleted:delelted.title
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
+
+
+
+
+
 export default route;

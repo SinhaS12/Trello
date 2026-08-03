@@ -1,6 +1,6 @@
 import express from 'express';
 import { middleware } from '../middleware/middleware';
-import { board_validation } from '../validation/board';
+import { board_delete, board_validation } from '../validation/board';
 import { prisma } from 'db';
 const route = express.Router();
 
@@ -52,4 +52,67 @@ route.post("/createBoard", middleware, async (req, res) => {
         })
     }
 })
+
+
+route.post("/boardDelete", middleware, async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(403).json({
+            success: false,
+            message: "Can,t Access the userId"
+        })
+    }
+    const main = board_delete.safeParse(req.body);
+    if (!main.success) {
+        return res.status(403).json({
+            success: false,
+            message: "Please check the inputs"
+        })
+    }
+    const { organizationId, boardId } = main.data;
+    try {
+        const find_orgaizationId = await prisma.membership.findFirst({
+            where: { organizationId: organizationId }, select: {
+                userId: true
+            }
+        })
+        if (!find_orgaizationId) {
+            return res.status(403).json({
+                success: false,
+                message: "Organization Not found"
+            })
+        }
+        if (userId != find_orgaizationId.userId) {
+            return res.status(403).json({
+                success: false,
+                message: "Access Denied!"
+            })
+        }
+        const find_board = await prisma.boards.findUnique({ where: { id: boardId }, select: { id: true } });
+        if (!find_board) {
+            return res.status(403).json({
+                success: false,
+                message: "Boards Not found !"
+            })
+        }
+        const delete_the_board = await prisma.boards.delete({ where: { id: find_board.id } });
+        return res.status(200).json({
+            success: true,
+            message: "Board deleted successfully",
+            board: delete_the_board
+        })
+
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
+
+
+
+
+
 export default route;
