@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  name         String
+  password     String
+  membership   membership[]
+  issueMapping issueMapping[]
+}
+
+model organization {
+  id          String       @id @default(uuid())
+  title       String       @unique
+  description String
+  membership  membership[]
+  board       Boards[]
+}
+
+model membership {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   organization @relation(fields: [organizationId], references: [id])
+}
+
+model Boards {
+  id             String       @id @default(uuid())
+  title          String
+  organizationId String
+  organization   organization @relation(fields: [organizationId], references: [id])
+  Issue          Issue[]
+  Section        Section[]
+}
+
+model Section {
+  id      String  @id @default(uuid())
+  title   String
+  boardId String
+  board   Boards  @relation(fields: [boardId], references: [id])
+  Issue   Issue[]
+}
+
+model Issue {
+  id           String         @id @default(uuid())
+  title        String
+  description  String
+  boardId      String
+  board        Boards         @relation(fields: [boardId], references: [id])
+  SectionId    String
+  Section      Section        @relation(fields: [SectionId], references: [id])
+  issueMapping issueMapping[]
+}
+
+model issueMapping {
+  id      String @id @default(uuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  issueId String
+  issue   Issue  @relation(fields: [issueId], references: [id])
+}
