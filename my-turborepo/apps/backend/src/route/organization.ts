@@ -61,3 +61,4 @@ route.post("/createOrganization", middleware, async (req, res) => {
         })
     }
 })
+export default route;

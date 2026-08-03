@@ -52,3 +52,4 @@ route.post("/createBoard", middleware, async (req, res) => {
         })
     }
 })
+export default route;

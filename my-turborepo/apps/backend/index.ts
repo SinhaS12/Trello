@@ -3,6 +3,8 @@ import { error } from 'console';
 import express from 'express';
 import dotenv from 'dotenv'
 import authroute from './src/route/auth.ts';
+import createOrgroute from './src/route/organization.ts';
+import createBoard from './src/route/board.ts';
 const app=express();
 app.use(express.json());
 if(!process.env.BACKEND_PORT){
@@ -12,6 +14,8 @@ const port=process.env.BACKEND_PORT;
 
 
 app.use("/auth",authroute);
+app.use("/org",createOrgroute);
+app.use("/board",createBoard);
 
 
 
