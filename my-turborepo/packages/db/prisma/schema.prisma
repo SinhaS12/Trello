@@ -39,7 +39,7 @@ model membership {
 
 model Boards {
   id             String       @id @default(uuid())
-  title          String
+  title          String @unique
   organizationId String
   organization   organization @relation(fields: [organizationId], references: [id])
   Issue          Issue[]

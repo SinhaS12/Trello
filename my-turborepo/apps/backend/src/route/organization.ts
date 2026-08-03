@@ -51,7 +51,7 @@ route.post("/createOrganization", middleware, async (req, res) => {
             success: true,
             message: "Organization made successfully",
             org_name: new_org,
-            admin_id: new_admin
+            admin_id: new_admin.userId
         })
 
     } catch (error) {
