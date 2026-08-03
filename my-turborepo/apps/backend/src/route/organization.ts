@@ -2,51 +2,62 @@ import express from 'express';
 import { Making_organization } from '../validation/organization';
 import { prisma } from 'db';
 import { middleware } from '../middleware/middleware';
-const route=express.Router();
+const route = express.Router();
 
-route.post("/createOrganization",middleware,async(req,res)=>{
-    const userId=req.userId;
-    if(!userId){
+route.post("/createOrganization", middleware, async (req, res) => {
+    const userId = req.userId as string;
+    if (!userId) {
         return res.status(403).json({
-            success:false,
-            message:"Can,t access the email "
+            success: false,
+            message: "Can,t access the email "
         })
     }
-    const main=Making_organization.safeParse(req.body);
-    if(!main.success){
+    const main = Making_organization.safeParse(req.body);
+    if (!main.success) {
         return res.status(402).json({
-            success:false,
-            message:"Please check the inputs "
+            success: false,
+            message: "Please check the inputs "
         })
     }
-    const {title,description}=main.data;
-    try{
-        const exisiting=await prisma.organization.findUnique({where:{title}});
-        if(exisiting){
+    const { title, description } = main.data;
+    try {
+        const exisiting = await prisma.organization.findUnique({ where: { title } });
+        if (exisiting) {
             return res.status(402).json({
-                success:false,
-                message:"Organization already exists"
+                success: false,
+                message: "Organization already exists"
             })
         }
-        const new_org=await prisma.organization.create({
-            data:{
+        const new_org = await prisma.organization.create({
+            data: {
                 title,
                 description
             },
-            select:{
-                title:true
+            select: {
+                title: true,
+                id: true
+            }
+        })
+        const new_admin = await prisma.membership.create({
+            data: {
+                userId: userId,
+                organizationId: new_org.id
+            },
+            select: {
+                userId: true
             }
         })
         return res.status(200).json({
-            success:true,
-            message:"Organization made successfully",
-            org_name:new_org
+            success: true,
+            message: "Organization made successfully",
+            org_name: new_org,
+            admin_id: new_admin
         })
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
         })
     }
 })
