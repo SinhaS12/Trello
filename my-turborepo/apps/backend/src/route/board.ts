@@ -1,6 +1,6 @@
 import express from 'express';
 import { middleware } from '../middleware/middleware';
-import { board_delete, board_validation } from '../validation/board';
+import { board_delete, board_rename, board_validation } from '../validation/board';
 import { prisma } from 'db';
 const route = express.Router();
 
@@ -110,6 +110,54 @@ route.post("/boardDelete", middleware, async (req, res) => {
         })
     }
 })
+
+route.get("/board", middleware, async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(403).json({
+            success: false,
+            message: "Can,t Get the userId"
+        })
+    }
+    try {
+    const find_mine=await prisma
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
+
+
+
+
+
+route.post("/boardRename", middleware, async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(403).json({
+            success: false,
+            message: "Can,t Access the user"
+        })
+    }
+    const main = board_rename.safeParse(req.body);
+    if (!main.success) {
+        return res.status(403).json({
+            success: false,
+            message: "Please check the inputs "
+        })
+    }
+    try {
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
+
 
 
 

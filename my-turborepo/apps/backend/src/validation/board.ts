@@ -12,3 +12,7 @@ export const board_delete=z.object({
     organizationId:z.string(),
     boardId:z.string()
 })
+
+export const board_rename=z.object({
+    title:z.string()
+})

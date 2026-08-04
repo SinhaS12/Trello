@@ -1,5 +1,5 @@
 import express from 'express';
-import { Delete_organization, Making_organization } from '../validation/organization';
+import { Delete_organization, Making_organization, rename_organization } from '../validation/organization';
 import { prisma } from 'db';
 import { middleware } from '../middleware/middleware';
 const route = express.Router();
@@ -97,13 +97,15 @@ route.delete("/deleteOrganization", middleware, async (req, res) => {
                 message: "Access Denied!"
             })
         }
-        const delelted = await prisma.organization.delete({ where: { id: powe_to_delete.id },select:{
-            title:true
-        } });
+        const delelted = await prisma.organization.delete({
+            where: { id: powe_to_delete.id }, select: {
+                title: true
+            }
+        });
         return res.status(200).json({
             success: true,
             message: "Organization Deleted Successfully",
-            deleted:delelted.title
+            deleted: delelted.title
         })
 
     } catch (error) {
@@ -114,7 +116,73 @@ route.delete("/deleteOrganization", middleware, async (req, res) => {
     }
 })
 
+route.get("/organization",middleware,async(req,res)=>{
+    const userId = req.userId as string;
+    if(!userId){
+        return res.status(404).json({
+            success:false,
+            message:"Can,t access the userId"
+        })
+    }
+    try{
+        const get_organization = await prisma.membership.findMany({ where: { userId } });
+        return res.status(200).json({
+            success: true,
+            organizations: get_organization
+        })
+    }catch(error){
+        return res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        })
+    }
+})
 
+
+
+route.post("/renameOrganization", middleware, async (req, res) => {
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(403).json({
+            success: false,
+            message: "Can,t Access the user"
+        })
+    }
+    const main = rename_organization.safeParse(req.body);
+    if (!main.success) {
+        return res.status(403).json({
+            success: false,
+            message: "Please check the inputs"
+        })
+    }
+    const { title, description } = main.data;
+    try {
+        const is_exist = await prisma.organization.findUnique({ where: { title } });
+        if (!is_exist) {
+            return res.status(403).json({
+                success: false,
+                message: "Can,t find the organization !"
+            })
+        }
+        const updatedOrganization = await prisma.organization.update({
+            where: { title },
+            data: {
+                title,
+                description
+            }
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Organization updated successfully",
+            organization: updatedOrganization
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
 
 
 
