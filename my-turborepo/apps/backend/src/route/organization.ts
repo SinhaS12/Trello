@@ -1,5 +1,5 @@
 import express from 'express';
-import { Delete_organization, Making_organization, rename_organization } from '../validation/organization';
+import { Delete_organization, Making_organization, rename_organization } from '../validation/organization_val';
 import { prisma } from 'db';
 import { middleware } from '../middleware/middleware';
 const route = express.Router();
@@ -140,7 +140,7 @@ route.get("/organization",middleware,async(req,res)=>{
 
 
 
-route.post("/renameOrganization", middleware, async (req, res) => {
+route.put("/renameOrganization", middleware, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
         return res.status(403).json({

@@ -1,6 +1,6 @@
 import express from 'express';
 import {prisma} from 'db';
-import { signin_validation, signup_validation } from '../validation/users';
+import { signin_validation, signup_validation } from '../validation/users_valid';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { error } from 'console';
