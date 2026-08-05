@@ -1,6 +1,6 @@
 import express from 'express';
 import { middleware } from '../middleware/middleware';
-import { board_delete, board_rename, board_validation } from '../validation/board_val';
+import { board_delete, board_rename, board_validation } from '../types/board_val';
 import { prisma } from 'db';
 const route = express.Router();
 
@@ -120,7 +120,7 @@ route.get("/board", middleware, async (req, res) => {
         })
     }
     try {
-    const find_mine=await prisma
+        const find_mine = await prisma
     } catch (error) {
         return res.status(500).json({
             success: false,

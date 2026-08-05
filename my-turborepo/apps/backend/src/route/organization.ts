@@ -1,5 +1,5 @@
 import express from 'express';
-import { Delete_organization, Making_organization, rename_organization } from '../validation/organization_val';
+import { Delete_organization, Making_organization, rename_organization } from '../types/organization_val';
 import { prisma } from 'db';
 import { middleware } from '../middleware/middleware';
 const route = express.Router();
@@ -116,24 +116,24 @@ route.delete("/deleteOrganization", middleware, async (req, res) => {
     }
 })
 
-route.get("/organization",middleware,async(req,res)=>{
+route.get("/organization", middleware, async (req, res) => {
     const userId = req.userId as string;
-    if(!userId){
+    if (!userId) {
         return res.status(404).json({
-            success:false,
-            message:"Can,t access the userId"
+            success: false,
+            message: "Can,t access the userId"
         })
     }
-    try{
+    try {
         const get_organization = await prisma.membership.findMany({ where: { userId } });
         return res.status(200).json({
             success: true,
             organizations: get_organization
         })
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
         })
     }
 })

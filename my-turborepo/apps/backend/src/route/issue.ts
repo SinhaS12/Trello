@@ -1,57 +1,127 @@
 import expres from 'express';
-const route=expres.Router();
+import { middleware } from '../middleware/middleware';
+import { get_issue } from '../types/issue_valid';
+import { prisma } from 'db';
+const route = expres.Router();
+route.use(middleware);
+//admin required 
+//organization valid
+//board valid
+//section valid 
+//creadential needed 
+//ready to go 
+route.post("/issue", async (req, res) => {
 
-route.post("/issue",async(require,res)=>{
-    try{
+    try {
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
-        })
-    }
-})
-route.get("/issue",async(require,res)=>{
-    try{
-
-    }catch(error){
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
-        })
-    }
-})
-
-route.get("/issue/:issueId",async(require,res)=>{
-    try{
-
-    }catch(error){
-        return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
         })
     }
 })
 
+route.get("/issue", async (req, res) => {
+    const main = get_issue.safeParse(req.body);
+    if (!main.success) {
+        return res.status(422).json({
+            success: false,
+            message: "Please check the inputs"
+        })
+    }
+    const { userId } = main.data;
+    try {
+        const get_all = await prisma.issueMapping.findMany({ where: { userId: userId } });
+        if (get_all.length == 0) {
+            return res.status(402).json({
+                success: false,
+                message: "No issue!"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Issue fetched successfully"
+        })
 
-route.delete("/issue/:issueId",async(require,res)=>{
-    try{
-
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
         })
     }
 })
+//organization check 
+//asigned check 
+//section check 
+//issue exist 
+//allow then
+route.get("/issue/:issueId", async (req, res) => {
+    const issueId = req.params.issueId;
+    if (!issueId) {
+        return res.status(402).json({
+            success: false,
+            message: "Issue Id required!"
+        })
+    }
+    const userId = req.userId;
+    if (!userId) {
+        return res.status(402).json({
+            success: false,
+            message: "Can,t Access the userId"
+        })
+    }
+    try {
+        
+        const get_issue = await prisma.issue.findUnique({ where: { id: issueId }, select: { title: true,description:true } });
+        if (!get_issue) {
+            return res.status(402).json({
+                success: false,
+                message: "No issue found on this id"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message:"Issue got successfully",
+            details:get_issue
+        })
 
-route.put("/issue_upadate",async(req,res)=>{
-    try{
 
-    }catch(error){
+    } catch (error) {
         return res.status(500).json({
-            success:false,
-            message:"Internal Server Error"
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
+//organization check 
+//asigned check 
+//section check 
+//issue exist 
+//delete then
+
+route.delete("/issue/:issueId", async (req, res) => {
+    try {
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
+        })
+    }
+})
+//organization check 
+//asigned check 
+//section check 
+//issue exist 
+//update then 
+route.put("/issue_upadate", async (req, res) => {
+    try {
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error"
         })
     }
 })
