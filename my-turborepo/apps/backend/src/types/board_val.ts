@@ -13,6 +13,11 @@ export const board_delete=z.object({
     boardId:z.string()
 })
 
+export const board_get=z.object({
+    boardId:z.string()
+})
+
+
 export const board_rename=z.object({
     title:z.string()
 })

@@ -7,11 +7,11 @@ import { error } from 'console';
 if (!process.env.JWT_SECRET) {
     throw error("Can,t Access the JWT_SECRET");
 }
+if(!process.env.HASH){
+    throw error("Can,t Access the hash");
+}
+const hash=process.env.HASH;
 const jwt_pass = process.env.JWT_SECRET;
-
-
-
-
 
 const route = express.Router();
 
@@ -26,14 +26,14 @@ route.post("/signup", async (req, res) => {
     }
     const { email, name, password } = main.data;
     try {
-        const find_existing = await prisma.user.findMany({ where: { email } });
+        const find_existing = await prisma.user.findUnique({ where: { email } });
         if (find_existing) {
             return res.status(409).json({
                 success: false,
                 message: "User already exist!"
             })
         }
-        const hide = await bcrypt.hash(password, 10);
+        const hide = await bcrypt.hash(password, hash);
         const new_one = await prisma.user.create({
             data: {
                 name,
@@ -52,11 +52,10 @@ route.post("/signup", async (req, res) => {
             name: new_one,
             token: token
         })
-
     } catch (error) {
         return res.status(500).json({
             success: false,
-            message: "Internal Server Error"
+            message: "Internal Server Error"  
         })
     }
 })
@@ -80,7 +79,7 @@ route.post("/signin", async (req, res) => {
         }
         const pass = await bcrypt.compare(password, find_existing.password);
         if (!pass) {
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
                 message: "Incorrect password please check !"
             })

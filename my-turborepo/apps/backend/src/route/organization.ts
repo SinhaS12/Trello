@@ -6,12 +6,6 @@ const route = express.Router();
 
 route.post("/createOrganization", middleware, async (req, res) => {
     const userId = req.userId as string;
-    if (!userId) {
-        return res.status(404).json({
-            success: false,
-            message: "Can,t access the email "
-        })
-    }
     const main = Making_organization.safeParse(req.body);
     if (!main.success) {
         return res.status(400).json({
@@ -38,7 +32,7 @@ route.post("/createOrganization", middleware, async (req, res) => {
                 id: true
             }
         })
-        const new_admin = await prisma.membership.create({
+        const new_admin = await prisma.admin.create({
             data: {
                 userId: userId,
                 organizationId: new_org.id
@@ -63,12 +57,6 @@ route.post("/createOrganization", middleware, async (req, res) => {
 })
 route.delete("/deleteOrganization", middleware, async (req, res) => {
     const userId = req.userId;
-    if (!userId) {
-        return res.status(404).json({
-            success: false,
-            message: "Can,t Access the user"
-        })
-    }
     const main = Delete_organization.safeParse(req.body);
     if (!main.success) {
         return res.status(400).json({
@@ -79,34 +67,41 @@ route.delete("/deleteOrganization", middleware, async (req, res) => {
 
     const { organizationId } = main.data;
     try {
-
-        const powe_to_delete = await prisma.membership.findFirst({
-            where: { organizationId: organizationId }, select: {
-                userId: true,
-                id: true
-            }
-        });
-        if (!powe_to_delete) {
+        const is_org_exist = await prisma.organization.findUnique({ where: { id: organizationId } });
+        if (!is_org_exist) {
             return res.status(404).json({
                 success: false,
-                message: "Can,t find the organization"
+                message: "Organization does not exist"
             })
         }
-        if (powe_to_delete.userId != userId) {
-            return res.status(403).json({
-                success: false,
-                message: "Access Denied!"
-            })
-        }
-        const delelted = await prisma.organization.delete({
-            where: { id: powe_to_delete.id }, select: {
-                title: true
+        const get_the_admin = await prisma.admin.findUnique({
+            where: {
+                organizationId: organizationId
+            },
+            select: {
+                userId: true
             }
         });
+        if (get_the_admin?.userId != userId) {
+            return res.status(405).json({
+                success: false,
+                message: "Access denied"
+            })
+        }
+        //can use transaction here but it also have some issues
+        await prisma.admin.delete({
+            where: { organizationId },
+        })
+        const delete_organization = await prisma.organization.delete({
+            where: { id: organizationId },
+            select: {
+                id: true
+            }
+        })
         return res.status(200).json({
             success: true,
             message: "Organization Deleted Successfully",
-            deleted: delelted.title
+            details: delete_organization.id
         })
 
     } catch (error) {
@@ -119,14 +114,8 @@ route.delete("/deleteOrganization", middleware, async (req, res) => {
 
 route.get("/organization", middleware, async (req, res) => {
     const userId = req.userId as string;
-    if (!userId) {
-        return res.status(400).json({
-            success: false,
-            message: "Can,t access the userId"
-        })
-    }
     try {
-        const get_organization = await prisma.membership.findMany({ where: { userId },select:{organizationId:true} });
+        const get_organization = await prisma.membership.findMany({ where: { userId }, select: { organizationId: true } });
         return res.status(200).json({
             success: true,
             organizations: get_organization
@@ -143,12 +132,6 @@ route.get("/organization", middleware, async (req, res) => {
 
 route.put("/renameOrganization", middleware, async (req, res) => {
     const userId = req.userId;
-    if (!userId) {
-        return res.status(400).json({
-            success: false,
-            message: "Can,t Access the user"
-        })
-    }
     const main = rename_organization.safeParse(req.body);
     if (!main.success) {
         return res.status(400).json({
@@ -156,26 +139,37 @@ route.put("/renameOrganization", middleware, async (req, res) => {
             message: "Please check the inputs"
         })
     }
-    const { title, description } = main.data;
+    const { organizationId, title, description } = main.data;
     try {
-        const is_exist = await prisma.organization.findUnique({ where: { title } });
-        if (!is_exist) {
+        const is_org_exist = await prisma.organization.findUnique({ where: { id: organizationId } });
+        if (!is_org_exist) {
             return res.status(404).json({
                 success: false,
-                message: "Can,t find the organization !"
+                message: "Organization does not exist"
             })
         }
-        const updatedOrganization = await prisma.organization.update({
-            where: { title },
-            data: {
-                title,
-                description
+        const admin_access = await prisma.admin.findUnique({ where: { organizationId }, select: { userId: true } });
+        if (admin_access?.userId != userId) {
+            return res.status(405).json({
+                success: false,
+                message: "Access denied"
+            })
+        }
+        const rename_karo = await prisma.organization.update({
+            where: { id: organizationId }, data: {
+                title: title,
+                description: description
+            },
+            select: {
+                title: true,
+                description: true
             }
-        });
+        })
         return res.status(200).json({
             success: true,
             message: "Organization updated successfully",
-            organization: updatedOrganization
+            details: rename_karo
+
         });
     } catch (error) {
         return res.status(500).json({

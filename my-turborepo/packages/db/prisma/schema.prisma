@@ -19,6 +19,7 @@ model User {
   password     String
   membership   membership[]
   issueMapping issueMapping[]
+  admin        admin[]
 }
 
 model organization {
@@ -27,6 +28,15 @@ model organization {
   description String
   membership  membership[]
   board       Boards[]
+  admin       admin[]
+}
+
+model admin {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id],onDelete: Cascade)
+  organizationId String       @unique
+  organization   organization @relation(fields: [organizationId], references: [id],onDelete: Cascade)
 }
 
 model membership {
@@ -39,9 +49,9 @@ model membership {
 
 model Boards {
   id             String       @id @default(uuid())
-  title          String @unique
+  title          String       @unique
   organizationId String
-  organization   organization @relation(fields: [organizationId], references: [id],onDelete: Cascade)
+  organization   organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   Issue          Issue[]
   Section        Section[]
 }
@@ -50,7 +60,7 @@ model Section {
   id      String  @id @default(uuid())
   title   String
   boardId String
-  board   Boards  @relation(fields: [boardId], references: [id],onDelete: Cascade)
+  board   Boards  @relation(fields: [boardId], references: [id], onDelete: Cascade)
   Issue   Issue[]
 }
 
