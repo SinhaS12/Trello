@@ -6,24 +6,26 @@ import { sendtounsigned } from '../external_api/resend';
 const router = express.Router();
 router.use(middleware);
 
+
+
 router.post("/invite", async (req, res) => {
     const userd = req.userId;
     if (!userd) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "User not found !"
         })
     }
     const Email = req.email as string;
     if (!Email) {
-        return res.status(403).json({
+        return res.status(404).json({
             success: false,
             message: "Can,t Access the userId"
         })
     }
     const main = invide_validation.safeParse(req.body);
     if (!main.success) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
@@ -32,7 +34,7 @@ router.post("/invite", async (req, res) => {
     try {
         const find_orgnization = await prisma.membership.findMany({ where: { organizationId: organizationId }, select: { userId: true } });
         if (find_orgnization.length == 0) {
-            res.status(403).json({
+            res.status(404).json({
                 success: false,
                 message: "Organization not found! "
             })
@@ -47,7 +49,7 @@ router.post("/invite", async (req, res) => {
         }
         const user_exist = await prisma.user.findUnique({ where: { id: userId } });
         if (!user_exist) {
-            return res.status(403).json({
+            return res.status(404).json({
                 success: false,
                 message: "User not found !",
                 link: sendtounsigned(Email, email)
@@ -66,17 +68,20 @@ router.post("/invite", async (req, res) => {
 })
 
 
+
+
+
 router.post("/accept", async (req, res) => {
     const userId = req.userId as string;
     if (!userId) {
-        return res.status(204).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
     }
     const main = accept_validation.safeParse(req.body);
     if (!main.success) {
-        return res.status(422).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
@@ -85,7 +90,7 @@ router.post("/accept", async (req, res) => {
     try {
         const is_org_exist = await prisma.organization.findUnique({ where: { id: organizationId } });
         if (!is_org_exist) {
-            return res.status(403).json({
+            return res.status(404).json({
                 success: false,
                 message: "Organization does not exist!"
             })

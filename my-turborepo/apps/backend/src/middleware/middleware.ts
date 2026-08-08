@@ -19,17 +19,17 @@ declare global {
 export function middleware(req: Request, res: Response, next: NextFunction) {
     const token = req.headers.authorization;
     if (!token) {
-        return res.status(403).json({
+        return res.status(401).json({
             success: false,
-            message: "Token invalid!"
+            message: "Please enter the token!"
         })
     }
     try {
         const decode = jwt.verify(token, jwt_pass) as JwtPayload;
         if(!decode){
-            return res.status(402).json({
+            return res.status(401).json({
                 success:false,
-                message:"Unauthorized"
+                message:"Unauthorized !"
             })
         }
         req.email = decode.email;

@@ -4,12 +4,9 @@ import { get_issue } from '../types/issue_valid';
 import { prisma } from 'db';
 const route = expres.Router();
 route.use(middleware);
-//admin required 
-//organization valid
-//board valid
-//section valid 
-//creadential needed 
-//ready to go 
+
+
+
 route.post("/issue", async (req, res) => {
 
     try {
@@ -21,6 +18,7 @@ route.post("/issue", async (req, res) => {
         })
     }
 })
+
 
 route.get("/issue", async (req, res) => {
     const main = get_issue.safeParse(req.body);
@@ -51,11 +49,7 @@ route.get("/issue", async (req, res) => {
         })
     }
 })
-//organization check 
-//asigned check 
-//section check 
-//issue exist 
-//allow then
+
 route.get("/issue/:issueId", async (req, res) => {
     const issueId = req.params.issueId;
     if (!issueId) {
@@ -94,11 +88,7 @@ route.get("/issue/:issueId", async (req, res) => {
         })
     }
 })
-//organization check 
-//asigned check 
-//section check 
-//issue exist 
-//delete then
+
 
 route.delete("/issue/:issueId", async (req, res) => {
     try {
@@ -110,11 +100,7 @@ route.delete("/issue/:issueId", async (req, res) => {
         })
     }
 })
-//organization check 
-//asigned check 
-//section check 
-//issue exist 
-//update then 
+
 route.put("/issue_upadate", async (req, res) => {
     try {
 

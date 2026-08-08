@@ -19,7 +19,7 @@ const route = express.Router();
 route.post("/signup", async (req, res) => {
     const main = signup_validation.safeParse(req.body);
     if (!main.success) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
@@ -28,7 +28,7 @@ route.post("/signup", async (req, res) => {
     try {
         const find_existing = await prisma.user.findMany({ where: { email } });
         if (find_existing) {
-            return res.status(402).json({
+            return res.status(409).json({
                 success: false,
                 message: "User already exist!"
             })
@@ -64,7 +64,7 @@ route.post("/signup", async (req, res) => {
 route.post("/signin", async (req, res) => {
     const main = signin_validation.safeParse(req.body);
     if (!main.success) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
@@ -73,14 +73,14 @@ route.post("/signin", async (req, res) => {
     try {
         const find_existing = await prisma.user.findUnique({ where: { email } });
         if (!find_existing) {
-            return res.status(403).json({
+            return res.status(404).json({
                 success: false,
                 message: "User Does not exists"
             })
         }
         const pass = await bcrypt.compare(password, find_existing.password);
         if (!pass) {
-            return res.status(403).json({
+            return res.status(400).json({
                 success: false,
                 message: "Incorrect password please check !"
             })

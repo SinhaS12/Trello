@@ -9,14 +9,14 @@ const route = express.Router();
 route.post("/createBoard", middleware, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Can,t access the userId"
         })
     }
     const main = board_validation.safeParse(req.body);
     if (!main.success) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
@@ -25,7 +25,7 @@ route.post("/createBoard", middleware, async (req, res) => {
     try {
         const find_exist = await prisma.boards.findUnique({ where: { title } });
         if (!find_exist) {
-            return res.status(403).json({
+            return res.status(409).json({
                 success: false,
                 message: "Board already exist"
             })
@@ -53,18 +53,17 @@ route.post("/createBoard", middleware, async (req, res) => {
     }
 })
 
-
 route.post("/boardDelete", middleware, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Can,t Access the userId"
         })
     }
     const main = board_delete.safeParse(req.body);
     if (!main.success) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs"
         })
@@ -77,7 +76,7 @@ route.post("/boardDelete", middleware, async (req, res) => {
             }
         })
         if (!find_orgaizationId) {
-            return res.status(403).json({
+            return res.status(409).json({
                 success: false,
                 message: "Organization Not found"
             })
@@ -90,7 +89,7 @@ route.post("/boardDelete", middleware, async (req, res) => {
         }
         const find_board = await prisma.boards.findUnique({ where: { id: boardId }, select: { id: true } });
         if (!find_board) {
-            return res.status(403).json({
+            return res.status(404).json({
                 success: false,
                 message: "Boards Not found !"
             })
@@ -114,13 +113,13 @@ route.post("/boardDelete", middleware, async (req, res) => {
 route.get("/board", middleware, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Can,t Get the userId"
         })
     }
     try {
-        const find_mine = await prisma
+        
     } catch (error) {
         return res.status(500).json({
             success: false,
@@ -136,14 +135,14 @@ route.get("/board", middleware, async (req, res) => {
 route.put("/boardRename", middleware, async (req, res) => {
     const userId = req.userId;
     if (!userId) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Can,t Access the user"
         })
     }
     const main = board_rename.safeParse(req.body);
     if (!main.success) {
-        return res.status(403).json({
+        return res.status(400).json({
             success: false,
             message: "Please check the inputs "
         })
